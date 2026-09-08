@@ -19,7 +19,7 @@ from mcp.types import (
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
 
 
-# stdout belongs to MCP stdio. Application logs go only to stderr.
+
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
@@ -29,9 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger("customer-mcp")
 
 
-# ---------------------------------------------------------
-# Strict validation types
-# ---------------------------------------------------------
+
 
 CustomerId = Annotated[
     str,
@@ -70,10 +68,7 @@ class TriggerRefundInput(BaseModel):
     reason: RefundReason
 
 
-# ---------------------------------------------------------
-# Mock customer data
-# ---------------------------------------------------------
-
+#Mock Customer Data
 CUSTOMERS: dict[str, dict[str, Any]] = {
     "CUST-12345": {
         "customer_id": "CUST-12345",
@@ -90,9 +85,6 @@ CUSTOMERS: dict[str, dict[str, Any]] = {
 }
 
 
-# ---------------------------------------------------------
-# MCP tool definitions
-# ---------------------------------------------------------
 
 GET_CUSTOMER_TOOL = Tool(
     name="get_customer_record",
@@ -108,9 +100,6 @@ TRIGGER_REFUND_TOOL = Tool(
 )
 
 
-# ---------------------------------------------------------
-# tools/list
-# ---------------------------------------------------------
 
 async def list_tools(
     ctx: ServerRequestContext,
@@ -127,9 +116,7 @@ async def list_tools(
     )
 
 
-# ---------------------------------------------------------
-# Validation error helper
-# ---------------------------------------------------------
+
 
 def invalid_arguments(exc: ValidationError) -> MCPError:
     """
@@ -150,9 +137,6 @@ def invalid_arguments(exc: ValidationError) -> MCPError:
     )
 
 
-# ---------------------------------------------------------
-# tools/call
-# ---------------------------------------------------------
 
 async def call_tool(
     ctx: ServerRequestContext,
@@ -165,10 +149,6 @@ async def call_tool(
         "tools/call requested tool=%s",
         params.name,
     )
-
-    # -----------------------------------------------------
-    # Tool 1: get_customer_record
-    # -----------------------------------------------------
 
     if params.name == "get_customer_record":
 
@@ -184,7 +164,7 @@ async def call_tool(
             validated.customer_id
         )
 
-        # Valid request, but business operation failed.
+       
         if customer is None:
 
             return CallToolResult(
@@ -211,10 +191,7 @@ async def call_tool(
             structured_content=customer,
         )
 
-    # -----------------------------------------------------
-    # Tool 2: trigger_refund
-    # -----------------------------------------------------
-
+ 
     if params.name == "trigger_refund":
 
         try:
@@ -264,9 +241,7 @@ async def call_tool(
             structured_content=result,
         )
 
-    # -----------------------------------------------------
-    # Unknown tool
-    # -----------------------------------------------------
+
 
     raise MCPError(
         INVALID_PARAMS,
@@ -274,9 +249,7 @@ async def call_tool(
     )
 
 
-# ---------------------------------------------------------
-# Create MCP Server
-# ---------------------------------------------------------
+
 
 server = Server(
     "customer-service",
@@ -286,9 +259,6 @@ server = Server(
 )
 
 
-# ---------------------------------------------------------
-# STDIO transport
-# ---------------------------------------------------------
 
 async def main() -> None:
 
