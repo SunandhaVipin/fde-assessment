@@ -5,9 +5,6 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 
-# ============================================================
-# FASTAPI APPLICATION
-# ============================================================
 
 app = FastAPI(
     title="Mock Streaming LLM Provider",
@@ -15,9 +12,7 @@ app = FastAPI(
 )
 
 
-# ============================================================
-# INPUT MODEL
-# ============================================================
+
 
 class GenerationRequest(
     BaseModel
@@ -25,9 +20,7 @@ class GenerationRequest(
     prompt: str
 
 
-# ============================================================
-# MOCK LLM STREAM
-# ============================================================
+
 
 async def mock_llm_stream():
     """
@@ -41,19 +34,16 @@ async def mock_llm_stream():
 
     chunks = [
 
-        # Normal text + beginning of email
+        
         "Hello. Your registered email is john.",
 
-        # Middle of email
+       
         "smith@example.",
 
-        # End email + beginning SSN
         "com. Your SSN is 123-45-",
 
-        # End SSN + beginning credit card
         "6789. Your card is 4111 1111 ",
 
-        # End credit card
         "1111 1111. End of response.",
     ]
 
@@ -63,16 +53,13 @@ async def mock_llm_stream():
         yield chunk
 
 
-        # Simulate an actual model generating over time.
 
         await asyncio.sleep(
             0.25
         )
 
 
-# ============================================================
-# GENERATION ENDPOINT
-# ============================================================
+
 
 @app.post("/generate")
 async def generate(
@@ -88,9 +75,6 @@ async def generate(
     )
 
 
-# ============================================================
-# DIRECT EXECUTION
-# ============================================================
 
 if __name__ == "__main__":
 
