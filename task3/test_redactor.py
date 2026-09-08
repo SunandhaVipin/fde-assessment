@@ -6,9 +6,7 @@ from task3.redactor import (
 )
 
 
-# ============================================================
-# HELPER
-# ============================================================
+
 
 def run_stream(
     chunks: list[str],
@@ -36,9 +34,7 @@ def run_stream(
     return output
 
 
-# ============================================================
-# COMPLETE EMAIL
-# ============================================================
+
 
 def test_complete_email_redacted():
 
@@ -55,9 +51,7 @@ def test_complete_email_redacted():
     assert REDACTED in result
 
 
-# ============================================================
-# COMPLETE SSN
-# ============================================================
+
 
 def test_complete_ssn_redacted():
 
@@ -74,9 +68,7 @@ def test_complete_ssn_redacted():
     assert REDACTED in result
 
 
-# ============================================================
-# COMPLETE CREDIT CARD
-# ============================================================
+
 
 def test_complete_credit_card_redacted():
 
@@ -93,9 +85,7 @@ def test_complete_credit_card_redacted():
     assert REDACTED in result
 
 
-# ============================================================
-# EMAIL SPLIT ACROSS CHUNKS
-# ============================================================
+
 
 def test_email_split_across_chunks():
 
@@ -118,9 +108,7 @@ def test_email_split_across_chunks():
     assert "Thank you." in result
 
 
-# ============================================================
-# EMAIL SPLIT AT @
-# ============================================================
+
 
 def test_email_split_at_at_symbol():
 
@@ -141,9 +129,6 @@ def test_email_split_at_at_symbol():
     assert REDACTED in result
 
 
-# ============================================================
-# SSN SPLIT ACROSS CHUNKS
-# ============================================================
 
 def test_ssn_split_across_chunks():
 
@@ -164,9 +149,7 @@ def test_ssn_split_across_chunks():
     assert REDACTED in result
 
 
-# ============================================================
-# CREDIT CARD SPLIT ACROSS CHUNKS
-# ============================================================
+
 
 def test_credit_card_split_across_chunks():
 
@@ -188,9 +171,6 @@ def test_credit_card_split_across_chunks():
     assert REDACTED in result
 
 
-# ============================================================
-# ALL THREE PII TYPES
-# ============================================================
 
 def test_multiple_pii_types():
 
@@ -227,9 +207,7 @@ def test_multiple_pii_types():
     )
 
 
-# ============================================================
-# NORMAL TEXT REMAINS UNCHANGED
-# ============================================================
+
 
 def test_normal_text_unchanged():
 
@@ -251,16 +229,13 @@ def test_normal_text_unchanged():
     assert result == original
 
 
-# ============================================================
-# MEMORY REMAINS BOUNDED
-# ============================================================
 
 def test_pending_buffer_is_bounded():
 
     redactor = StreamingRedactor()
 
 
-    # Feed many pieces of data.
+  
 
     for _ in range(500):
 
@@ -275,9 +250,7 @@ def test_pending_buffer_is_bounded():
         )
 
 
-# ============================================================
-# SAFE PREFIX CAN STREAM BEFORE END
-# ============================================================
+
 
 def test_safe_text_can_be_emitted_before_flush():
 
@@ -289,21 +262,15 @@ def test_safe_text_can_be_emitted_before_flush():
     )
 
 
-    # The normal prefix should be available before the stream
-    # has ended.
+    
 
     assert "Hello customer." in first_output
 
 
-    # But the potentially sensitive suffix should not yet
-    # have leaked.
+    
 
     assert "john." not in first_output
 
-
-# ============================================================
-# NO RAW PII IN FINAL MOCK-LIKE STREAM
-# ============================================================
 
 def test_mock_provider_chunk_pattern():
 
