@@ -43,13 +43,11 @@ class CompletionRouter:
             )
 
         except (ProviderRateLimited, ProviderTimeout):
-            # These are the two explicitly permitted
-            # fallback conditions.
+          
             pass
 
         except ProviderFailure as exc:
-            # Generic provider failures should not expose
-            # upstream implementation details.
+           
             raise AllProvidersFailed(
                 "Primary provider failed"
             ) from exc
