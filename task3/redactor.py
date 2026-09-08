@@ -1,36 +1,12 @@
 import regex
 
 
-# ============================================================
-# REPLACEMENT VALUE
-# ============================================================
+
 
 REDACTED = "[REDACTED]"
 
 
-# ============================================================
-# PII REGULAR EXPRESSIONS
-# ============================================================
-#
-# We use the third-party "regex" package rather than Python's
-# built-in "re" because regex supports:
-#
-#     partial=True
-#
-# This lets us recognize that the END of a received chunk
-# might be the beginning of a sensitive value that continues
-# in the next chunk.
-#
-# Example:
-#
-# chunk 1:
-#     john.smith@
-#
-# chunk 2:
-#     example.com
-#
-# We must not release "john.smith@" before seeing chunk 2.
-# ============================================================
+
 
 
 EMAIL_PATTERN = regex.compile(
@@ -84,7 +60,6 @@ CREDIT_CARD_PATTERN = regex.compile(
 )
 
 
-# All sensitive patterns we want to inspect.
 
 PII_PATTERNS = [
     EMAIL_PATTERN,
@@ -93,25 +68,11 @@ PII_PATTERNS = [
 ]
 
 
-# ============================================================
-# BOUNDED STREAMING STATE
-# ============================================================
-#
-# We never keep the entire generated response in memory.
-#
-# We only retain a short suffix that could potentially be the
-# beginning of a PII value split across chunks.
-#
-# This protects memory usage even if the provider streams a
-# very large response.
-# ============================================================
+
 
 MAX_PENDING_CHARS = 160
 
 
-# ============================================================
-# COMPLETE REDACTION
-# ============================================================
 
 def redact_complete(
     text: str,
@@ -143,9 +104,7 @@ def redact_complete(
     return result
 
 
-# ============================================================
-# FIND A POSSIBLE PARTIAL PII SUFFIX
-# ============================================================
+
 
 def _earliest_partial_suffix_start(
     text: str,
@@ -176,10 +135,6 @@ def _earliest_partial_suffix_start(
         return None
 
 
-    # Only examine a bounded tail.
-    #
-    # This guarantees that our work does not grow with the
-    # total size of the generated response.
 
     scan_start = max(
         0,
@@ -206,8 +161,7 @@ def _earliest_partial_suffix_start(
             )
 
 
-            # If partial=True, the text could become a valid
-            # complete match if future characters arrive.
+            
 
             if (
                 match is not None
@@ -225,9 +179,7 @@ def _earliest_partial_suffix_start(
     return earliest
 
 
-# ============================================================
-# STREAMING REDACTOR
-# ============================================================
+
 
 class StreamingRedactor:
     """
@@ -255,10 +207,7 @@ class StreamingRedactor:
         self.pending = ""
 
 
-    # ========================================================
-    # PUSH ONE STREAMING CHUNK
-    # ========================================================
-
+ 
     def push(
         self,
         chunk: str,
@@ -277,8 +226,7 @@ class StreamingRedactor:
             return ""
 
 
-        # Combine the small amount of text we held from the
-        # previous chunk with the new chunk.
+   
 
         combined = (
             self.pending
@@ -286,17 +234,14 @@ class StreamingRedactor:
         )
 
 
-        # We can now reconsider everything because a partial
-        # match from the previous chunk may have become a
-        # complete PII value.
+       
 
         redacted = redact_complete(
             combined
         )
 
 
-        # Determine whether the end of the redacted text could
-        # still be the beginning of a PII value.
+    
 
         partial_start = (
             _earliest_partial_suffix_start(
@@ -305,9 +250,7 @@ class StreamingRedactor:
         )
 
 
-        # ----------------------------------------------------
-        # No possible partial PII at the end
-        # ----------------------------------------------------
+        
 
         if partial_start is None:
 
@@ -316,28 +259,21 @@ class StreamingRedactor:
             return redacted
 
 
-        # ----------------------------------------------------
-        # Safe part
-        # ----------------------------------------------------
+       
 
         safe_text = redacted[
             :partial_start
         ]
 
 
-        # ----------------------------------------------------
-        # Hold the uncertain suffix
-        # ----------------------------------------------------
+       
 
         self.pending = redacted[
             partial_start:
         ]
 
 
-        # ----------------------------------------------------
-        # Defensive memory bound
-        # ----------------------------------------------------
-
+    
         if (
             len(self.pending)
             > MAX_PENDING_CHARS
@@ -360,9 +296,7 @@ class StreamingRedactor:
         return safe_text
 
 
-    # ========================================================
-    # END OF STREAM
-    # ========================================================
+   
 
     def flush(
         self,
