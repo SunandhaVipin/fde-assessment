@@ -8,18 +8,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
 
 DOWNSTREAM_URL = (
     "http://127.0.0.1:9001/mcp"
 )
 
 
-# ============================================================
-# LOGGING
-# ============================================================
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,9 +32,6 @@ logger = logging.getLogger(
 )
 
 
-# ============================================================
-# FASTAPI APPLICATION
-# ============================================================
 
 app = FastAPI(
     title="MCP Authorization Gateway",
@@ -47,15 +39,6 @@ app = FastAPI(
 )
 
 
-# ============================================================
-# DEMO TOKENS
-# ============================================================
-#
-# For the assessment we use deterministic tokens.
-#
-# In production these would normally be JWTs or opaque tokens
-# validated through an identity provider.
-# ============================================================
 
 TOKEN_ROLES = {
     "viewer-token": "viewer",
@@ -63,9 +46,8 @@ TOKEN_ROLES = {
 }
 
 
-# ============================================================
-# JSON-RPC ERROR CODES
-# ============================================================
+
+
 
 PARSE_ERROR = -32700
 INVALID_REQUEST = -32600
@@ -73,10 +55,6 @@ INVALID_PARAMS = -32602
 
 UNAUTHORIZED_TOOL_CALL = -32001
 
-
-# ============================================================
-# JSON-RPC ERROR HELPER
-# ============================================================
 
 def jsonrpc_error(
     request_id: Any,
@@ -97,9 +75,7 @@ def jsonrpc_error(
     }
 
 
-# ============================================================
-# BEARER TOKEN PARSER
-# ============================================================
+
 
 def extract_role(
     authorization_header: str | None,
@@ -151,9 +127,7 @@ def extract_role(
     )
 
 
-# ============================================================
-# DOWNSTREAM FORWARDER
-# ============================================================
+
 
 async def forward_to_downstream(
     payload: dict[str, Any],
@@ -216,9 +190,6 @@ async def forward_to_downstream(
         )
 
 
-# ============================================================
-# VALIDATE JSON-RPC ENVELOPE
-# ============================================================
 
 def validate_jsonrpc_request(
     payload: Any,
@@ -257,9 +228,7 @@ def validate_jsonrpc_request(
     return True
 
 
-# ============================================================
-# MCP GATEWAY ENDPOINT
-# ============================================================
+
 
 @app.post("/mcp")
 async def mcp_gateway(
@@ -288,10 +257,7 @@ async def mcp_gateway(
     """
 
 
-    # ========================================================
-    # STEP 1: PARSE JSON
-    # ========================================================
-
+   
     try:
 
         payload = await request.json()
@@ -312,9 +278,7 @@ async def mcp_gateway(
         )
 
 
-    # ========================================================
-    # STEP 2: VALIDATE JSON-RPC ENVELOPE
-    # ========================================================
+
 
     request_id = (
         payload.get("id")
@@ -344,9 +308,7 @@ async def mcp_gateway(
     method = payload["method"]
 
 
-    # ========================================================
-    # STEP 3: AUTHENTICATE
-    # ========================================================
+  
 
     authorization = request.headers.get(
         "Authorization"
@@ -381,9 +343,7 @@ async def mcp_gateway(
     )
 
 
-    # ========================================================
-    # STEP 4: AUTHORIZE tools/call
-    # ========================================================
+   
 
     if method == "tools/call":
 
@@ -392,9 +352,7 @@ async def mcp_gateway(
         )
 
 
-        # ----------------------------------------------------
-        # Validate tools/call params
-        # ----------------------------------------------------
+  
 
         if not isinstance(
             params,
@@ -431,18 +389,6 @@ async def mcp_gateway(
             )
 
 
-        # ----------------------------------------------------
-        # SECURITY POLICY
-        #
-        # Any tool beginning with:
-        #
-        #     admin_
-        #
-        # requires:
-        #
-        #     role == "admin"
-        # ----------------------------------------------------
-
         if (
             tool_name.startswith(
                 "admin_"
@@ -458,14 +404,7 @@ async def mcp_gateway(
             )
 
 
-            # IMPORTANT:
-            #
-            # We return here BEFORE calling:
-            #
-            # forward_to_downstream(...)
-            #
-            # Therefore unauthorized calls cannot reach
-            # the protected downstream tool.
+          
 
             return JSONResponse(
                 status_code=200,
@@ -477,9 +416,7 @@ async def mcp_gateway(
             )
 
 
-    # ========================================================
-    # STEP 5: FORWARD AUTHORIZED REQUEST
-    # ========================================================
+
 
     try:
 
@@ -492,8 +429,7 @@ async def mcp_gateway(
 
     except RuntimeError:
 
-        # Do not leak internal networking exceptions,
-        # URLs, stack traces, etc. to the client.
+      
 
         return JSONResponse(
             status_code=200,
@@ -505,9 +441,7 @@ async def mcp_gateway(
         )
 
 
-    # ========================================================
-    # STEP 6: RETURN DOWNSTREAM RESPONSE TRANSPARENTLY
-    # ========================================================
+  
 
     return JSONResponse(
         status_code=200,
@@ -515,9 +449,7 @@ async def mcp_gateway(
     )
 
 
-# ============================================================
-# DIRECT EXECUTION
-# ============================================================
+
 
 if __name__ == "__main__":
 
