@@ -1,0 +1,9 @@
+mcp[cli]>=2
+fastapi
+uvicorn
+httpx
+pydantic>=2
+aiosqlite
+tiktoken
+pytest
+pytest-asyncio
