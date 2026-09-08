@@ -76,9 +76,6 @@ class ModelProvider:
             ) from exc
 
 
-# ------------------------------------------------------------------
-# Mock provider used only for local assessment testing
-# ------------------------------------------------------------------
 
 mock_app = FastAPI(
     title="Mock LLM Provider",
@@ -100,7 +97,6 @@ async def mock_complete(
         "primary",
     )
 
-    # Simulate primary-provider HTTP 429
     if (
         provider_name == "primary"
         and "force_429" in request.prompt.lower()
@@ -110,14 +106,13 @@ async def mock_complete(
             detail="Provider rate limit",
         )
 
-    # Simulate primary-provider timeout
+ 
     if (
         provider_name == "primary"
         and "force_timeout" in request.prompt.lower()
     ):
         await asyncio.sleep(4.0)
 
-    # Optional generic failure scenario
     if (
         provider_name == "primary"
         and "force_error" in request.prompt.lower()
@@ -127,7 +122,7 @@ async def mock_complete(
             detail="Internal provider failure",
         )
 
-    # Simple deterministic mock token accounting.
+
     input_tokens = max(
         1,
         len(request.prompt.split()),
