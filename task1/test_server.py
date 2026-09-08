@@ -8,27 +8,20 @@ from task1.server import server
 
 @pytest.fixture
 def anyio_backend():
-    """
-    Force pytest-anyio to use asyncio.
-    """
+   
     return "asyncio"
 
 
 @pytest.fixture
 async def client():
-    """
-    Create an in-memory MCP client connected directly
-    to the Task 1 server.
-    """
+    
     async with Client(server) as connected_client:
         yield connected_client
 
 
 @pytest.mark.anyio
 async def test_list_tools(client: Client):
-    """
-    Verify that both required MCP tools are advertised.
-    """
+  
 
     result = await client.list_tools()
 
@@ -45,10 +38,7 @@ async def test_list_tools(client: Client):
 
 @pytest.mark.anyio
 async def test_customer_tool_schema(client: Client):
-    """
-    Verify that get_customer_record advertises
-    customer_id as a required input.
-    """
+  
 
     result = await client.list_tools()
 
@@ -66,10 +56,7 @@ async def test_customer_tool_schema(client: Client):
 
 @pytest.mark.anyio
 async def test_refund_tool_schema(client: Client):
-    """
-    Verify that trigger_refund advertises all
-    required inputs.
-    """
+   
 
     result = await client.list_tools()
 
@@ -94,9 +81,7 @@ async def test_refund_tool_schema(client: Client):
 async def test_get_customer_record_success(
     client: Client,
 ):
-    """
-    Valid customer ID should return customer data.
-    """
+    
 
     result = await client.call_tool(
         "get_customer_record",
@@ -127,10 +112,7 @@ async def test_get_customer_record_success(
 async def test_second_customer_success(
     client: Client,
 ):
-    """
-    Verify the second mock customer can also
-    be retrieved successfully.
-    """
+    
 
     result = await client.call_tool(
         "get_customer_record",
@@ -169,10 +151,7 @@ async def test_invalid_customer_id_format(
     client: Client,
     customer_id,
 ):
-    """
-    Invalid customer ID formats must generate
-    JSON-RPC Invalid Params (-32602).
-    """
+   
 
     with pytest.raises(MCPError) as exc:
 
@@ -193,9 +172,7 @@ async def test_invalid_customer_id_format(
 async def test_missing_customer_id(
     client: Client,
 ):
-    """
-    Missing customer_id should be rejected.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -214,10 +191,7 @@ async def test_missing_customer_id(
 async def test_extra_customer_fields_rejected(
     client: Client,
 ):
-    """
-    Unexpected arguments should be rejected
-    because extra='forbid' is enabled.
-    """
+   
 
     with pytest.raises(MCPError) as exc:
 
@@ -239,11 +213,7 @@ async def test_extra_customer_fields_rejected(
 async def test_nonexistent_customer_is_tool_error(
     client: Client,
 ):
-    """
-    CUST-99999 has the correct format, so this
-    should be a tool execution error rather than
-    an Invalid Params error.
-    """
+   
 
     result = await client.call_tool(
         "get_customer_record",
@@ -264,9 +234,7 @@ async def test_nonexistent_customer_is_tool_error(
 async def test_trigger_refund_success(
     client: Client,
 ):
-    """
-    A valid refund request should succeed.
-    """
+    
 
     result = await client.call_tool(
         "trigger_refund",
@@ -304,10 +272,7 @@ async def test_trigger_refund_success(
 async def test_zero_refund_rejected(
     client: Client,
 ):
-    """
-    Refund amount must be greater than zero.
-    """
-
+   
     with pytest.raises(MCPError) as exc:
 
         await client.call_tool(
@@ -329,9 +294,7 @@ async def test_zero_refund_rejected(
 async def test_negative_refund_rejected(
     client: Client,
 ):
-    """
-    Negative refund amounts must be rejected.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -354,10 +317,7 @@ async def test_negative_refund_rejected(
 async def test_short_refund_reason_rejected(
     client: Client,
 ):
-    """
-    Refund reason must contain at least
-    10 characters.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -380,9 +340,7 @@ async def test_short_refund_reason_rejected(
 async def test_missing_refund_reason_rejected(
     client: Client,
 ):
-    """
-    Missing refund reason should fail validation.
-    """
+   
 
     with pytest.raises(MCPError) as exc:
 
@@ -404,9 +362,7 @@ async def test_missing_refund_reason_rejected(
 async def test_missing_refund_amount_rejected(
     client: Client,
 ):
-    """
-    Missing amount should fail validation.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -428,10 +384,7 @@ async def test_missing_refund_amount_rejected(
 async def test_invalid_refund_customer_id(
     client: Client,
 ):
-    """
-    Refunds should enforce the same CUST-XXXXX
-    customer ID format.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -454,9 +407,7 @@ async def test_invalid_refund_customer_id(
 async def test_extra_refund_field_rejected(
     client: Client,
 ):
-    """
-    Unexpected fields must not be silently ignored.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
@@ -480,10 +431,7 @@ async def test_extra_refund_field_rejected(
 async def test_refund_for_nonexistent_customer(
     client: Client,
 ):
-    """
-    Valid customer ID format but missing customer
-    should produce a tool execution error.
-    """
+   
 
     result = await client.call_tool(
         "trigger_refund",
@@ -506,10 +454,7 @@ async def test_refund_for_nonexistent_customer(
 async def test_unknown_tool(
     client: Client,
 ):
-    """
-    Unknown tool names are rejected by our
-    dispatcher.
-    """
+    
 
     with pytest.raises(MCPError) as exc:
 
