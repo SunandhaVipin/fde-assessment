@@ -5,18 +5,13 @@ from fastapi.testclient import TestClient
 from task2 import gateway
 
 
-# ============================================================
-# TEST CLIENT
-# ============================================================
+
 
 client = TestClient(
     gateway.app
 )
 
 
-# ============================================================
-# TEST: TOKEN → ROLE EXTRACTION
-# ============================================================
 
 def test_viewer_token_extracts_viewer_role():
 
@@ -54,9 +49,7 @@ def test_missing_authorization_returns_none():
     assert role is None
 
 
-# ============================================================
-# TEST: tools/list IS FORWARDED
-# ============================================================
+
 
 def test_tools_list_forwarded_for_viewer(
     monkeypatch,
@@ -130,9 +123,6 @@ def test_tools_list_forwarded_for_viewer(
     )
 
 
-# ============================================================
-# TEST: NORMAL TOOL ALLOWED FOR VIEWER
-# ============================================================
 
 def test_viewer_can_call_normal_tool(
     monkeypatch,
@@ -207,11 +197,7 @@ def test_viewer_can_call_normal_tool(
     )
 
 
-# ============================================================
-# MOST IMPORTANT SECURITY TEST
-#
-# VIEWER MUST NOT REACH admin_* DOWNSTREAM TOOL
-# ============================================================
+
 
 def test_viewer_admin_tool_blocked_before_downstream(
     monkeypatch,
@@ -269,9 +255,7 @@ def test_viewer_admin_tool_blocked_before_downstream(
     assert response.status_code == 200
 
 
-    # Critical requirement:
-    #
-    # downstream must NEVER have been called.
+  
 
     assert downstream_called is False
 
@@ -289,9 +273,7 @@ def test_viewer_admin_tool_blocked_before_downstream(
     )
 
 
-# ============================================================
-# TEST: ADMIN CAN CALL ADMIN TOOL
-# ============================================================
+
 
 def test_admin_can_call_admin_tool(
     monkeypatch,
@@ -367,9 +349,6 @@ def test_admin_can_call_admin_tool(
     )
 
 
-# ============================================================
-# TEST: MISSING TOKEN
-# ============================================================
 
 def test_missing_token_rejected(
     monkeypatch,
@@ -424,9 +403,7 @@ def test_missing_token_rejected(
     )
 
 
-# ============================================================
-# TEST: INVALID TOKEN
-# ============================================================
+
 
 def test_invalid_token_rejected(
     monkeypatch,
@@ -478,9 +455,7 @@ def test_invalid_token_rejected(
     )
 
 
-# ============================================================
-# TEST: INVALID tools/call PARAMS
-# ============================================================
+
 
 def test_tools_call_missing_name():
 
@@ -508,9 +483,7 @@ def test_tools_call_missing_name():
     )
 
 
-# ============================================================
-# TEST: INVALID JSON-RPC VERSION
-# ============================================================
+
 
 def test_invalid_jsonrpc_request():
 
@@ -537,9 +510,7 @@ def test_invalid_jsonrpc_request():
     )
 
 
-# ============================================================
-# TEST: MALFORMED JSON
-# ============================================================
+
 
 def test_malformed_json():
 
@@ -564,9 +535,8 @@ def test_malformed_json():
     )
 
 
-# ============================================================
-# TEST: DOWNSTREAM FAILURE IS SANITIZED
-# ============================================================
+
+
 
 def test_downstream_failure_is_sanitized(
     monkeypatch,
