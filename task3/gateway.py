@@ -11,18 +11,13 @@ from pydantic import BaseModel
 from task3.redactor import StreamingRedactor
 
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
 
 PROVIDER_URL = (
     "http://127.0.0.1:9101/generate"
 )
 
 
-# ============================================================
-# LOGGING
-# ============================================================
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,9 +35,7 @@ logger = logging.getLogger(
 )
 
 
-# ============================================================
-# FASTAPI APPLICATION
-# ============================================================
+
 
 app = FastAPI(
     title="Streaming LLM Guardrail Gateway",
@@ -50,9 +43,7 @@ app = FastAPI(
 )
 
 
-# ============================================================
-# REQUEST MODEL
-# ============================================================
+
 
 class GenerationRequest(
     BaseModel
@@ -60,9 +51,7 @@ class GenerationRequest(
     prompt: str
 
 
-# ============================================================
-# STREAMING PROXY
-# ============================================================
+
 
 async def stream_guarded_response(
     prompt: str,
@@ -99,9 +88,7 @@ async def stream_guarded_response(
         ) as client:
 
 
-            # ------------------------------------------------
-            # Open a streaming connection to the provider
-            # ------------------------------------------------
+        
 
             async with client.stream(
                 "POST",
@@ -120,19 +107,14 @@ async def stream_guarded_response(
                 )
 
 
-                # ============================================
-                # STREAM CHUNK-BY-CHUNK
-                # ============================================
+         
 
                 async for chunk in (
                     response.aiter_text()
                 ):
 
 
-                    # ----------------------------------------
-                    # Run each incoming piece through our
-                    # stateful redactor.
-                    # ----------------------------------------
+                  
 
                     safe_text = (
                         redactor.push(
@@ -141,18 +123,14 @@ async def stream_guarded_response(
                     )
 
 
-                    # ----------------------------------------
-                    # Send safe text immediately.
-                    # ----------------------------------------
+                   
 
                     if safe_text:
 
                         yield safe_text
 
 
-                # ============================================
-                # PROVIDER FINISHED
-                # ============================================
+            
 
                 remaining = (
                     redactor.flush()
@@ -188,9 +166,6 @@ async def stream_guarded_response(
         )
 
 
-# ============================================================
-# GATEWAY ENDPOINT
-# ============================================================
 
 @app.post("/v1/generate")
 async def generate(
@@ -211,15 +186,13 @@ async def generate(
         ),
         media_type="text/plain",
         headers={
-            # Helps discourage proxy buffering.
+           
             "X-Accel-Buffering": "no",
         },
     )
 
 
-# ============================================================
-# DIRECT EXECUTION
-# ============================================================
+
 
 if __name__ == "__main__":
 
